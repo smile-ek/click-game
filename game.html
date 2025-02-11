@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>クリックゲーム</title>
+    <style>
+        body {
+            text-align: center;
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+        }
+
+        button {
+            font-size: 20px;
+            padding: 10px 20px;
+            margin-top: 20px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h1>クリックゲーム</h1>
+    <p>スコア: <span id="score">0</span></p>
+    <button id="clickButton">クリック！</button>
+    <p id="timer">残り時間: <span id="time">10</span>秒</p>
+
+    <script>
+        let score = 0;
+        let timeLeft = 10;
+        let timer;
+
+        document.getElementById("clickButton").addEventListener("click", () => {
+            if (timeLeft > 0) {
+                score++;
+                document.getElementById("score").textContent = score;
+                // 親ページにスコアを送る
+                window.parent.postMessage(score, "*");
+            }
+        });
+
+        function countdown() {
+            if (timeLeft > 0) {
+                timeLeft--;
+                document.getElementById("time").textContent = timeLeft;
+            } else {
+                clearInterval(timer);
+                document.getElementById("clickButton").disabled = true;
+                alert(`ゲーム終了！スコア: ${score}`);
+            }
+        }
+
+        // 1秒ごとにカウントダウンを実行
+        timer = setInterval(countdown, 1000);
+
+        // 親ページからリセットメッセージを受け取ったらスコアをリセット
+        window.addEventListener("message", (event) => {
+            if (event.data === "reset") {
+                score = 0;
+                timeLeft = 10;
+                document.getElementById("score").textContent = score;
+                document.getElementById("time").textContent = timeLeft;
+                document.getElementById("clickButton").disabled = false;
+                clearInterval(timer);
+                timer = setInterval(countdown, 1000);
+            }
+        });
+    </script>
+</body>
+</html>
